@@ -45,16 +45,16 @@ if __name__ == '__main__':
 
     # model
     if args.snapshot is None:
-        model = models.model_utils.get_model(embeddings, args)
+        model = model_utils.get_model(embeddings, args)
     else :
         print('\nLoading model from [%s]...' % args.snapshot)
         try:
             model = torch.load(args.snapshot)
         except :
             print("Sorry, This snapshot doesn't exist."); exit()
-
+    print(model)
 
     print()
     # train
     if args.train :
-        train_utils.train_model(train_data, dev_data, model, gen, args)
+        train_utils.train_model(train_data, dev_data, model, args)

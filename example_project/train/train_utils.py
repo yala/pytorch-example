@@ -4,17 +4,18 @@ import torch
 import torch.autograd as autograd
 import torch.nn.functional as F
 import torch.utils.data as data
-import tqdm
+from tqdm import tqdm
 import datetime
 import pdb
+import numpy as np
 
-def train_model(train_data, dev_data, model, gen, args):
+def train_model(train_data, dev_data, model, args):
 
 
     if args.cuda:
         model = model.cuda()
 
-    optimizer = torch.optim.Adam(get_params(gen), lr=args.lr)
+    optimizer = torch.optim.Adam(model.parameters() , lr=args.lr)
 
     model.train()
 
@@ -23,17 +24,14 @@ def train_model(train_data, dev_data, model, gen, args):
         print("-------------\nEpoch {}:\n".format(epoch))
 
 
-        loss = run_epoch(train_data, True, model, model_optimizer, epoch, args)
+        loss = run_epoch(train_data, True, model, optimizer, args)
 
-        log_statement = 'Train MSE - loss: {:.6f}'.format( loss)
+        print('Train MSE loss: {:.6f}'.format( loss))
 
+        print()
 
-        # Log train performance
-        print(log_statement)
-        # Log dev performance
-
-        val_loss = run_epoch(dev_data, False, model,  epoch,  args, )
-        log_statement = 'Val MSE - loss: {:.6f}'.format( val_loss)
+        val_loss = run_epoch(dev_data, False, model, optimizer, args)
+        print('Val MSE loss: {:.6f}'.format( val_loss))
 
         # Save model
         torch.save(model, args.save_path)
@@ -67,7 +65,7 @@ def run_epoch(data, is_training, model, optimizer, args):
             optimizer.zero_grad()
 
         out = model(x)
-        loss = F.mse_loss(out, target.float())
+        loss = F.mse_loss(out, y.float())
 
 
         if is_training:
